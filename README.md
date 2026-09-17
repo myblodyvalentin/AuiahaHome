@@ -1,0 +1,3 @@
+# AuiahaHome
+
+My personal website.
