@@ -1,6 +1,7 @@
 import './style.css'
 import { initSketch } from './sketch.js'
 import { initGuestbook } from './guestbook.js'
+import { initNotes } from './notes-ui.js'
 
 const GITHUB_URL = 'https://github.com/myblodyvalentin'
 const AVATAR_URL = 'https://avatars.githubusercontent.com/u/233668318?v=4'
@@ -33,12 +34,12 @@ const MODULES = [
   {
     id: 'notes',
     title: '笔记',
-    desc: '技术札记、学习路径，以及路上随手记下的想法。',
+    desc: 'Java Web 与 Linux 两个专栏，点击进入阅读；下方可留言。',
   },
   {
     id: 'contact',
     title: '联系',
-    desc: 'GitHub 登录留言板，内容保存在阿里云服务器。',
+    desc: 'GitHub 入口与留言板。',
   },
 ]
 
@@ -60,29 +61,6 @@ const PROJECTS = [
     status: '构思中',
     desc: '把重复劳动收成小工具的想法簿，从脚本到轻量网页逐步落地。',
     href: GITHUB_URL,
-  },
-]
-
-const NOTES = [
-  {
-    date: '2026.03',
-    title: '从空白页到 AuiahaHome',
-    excerpt: '记录个人站从命名、主视觉到主题色体系的搭建过程。',
-  },
-  {
-    date: '2026.02',
-    title: '前端交互里的「留白」',
-    excerpt: '菜单展开、页面位移与作画手势如何共用同一套节奏。',
-  },
-  {
-    date: '2026.01',
-    title: '东北大学的一周笔记',
-    excerpt: '课程、代码与生活交汇时，值得留下来的几段思考。',
-  },
-  {
-    date: '2025.12',
-    title: 'GitHub 作为公开工作台',
-    excerpt: '用仓库讲述进度，而不是只存放结果。',
   },
 ]
 
@@ -109,19 +87,6 @@ function renderProjects() {
         <span class="entry__status">${p.status}</span>
       </div>
       <p class="entry__desc">${p.desc}</p>
-    </article>`
-  ).join('')
-}
-
-function renderNotes() {
-  return NOTES.map(
-    (n) => `
-    <article class="entry">
-      <div class="entry__meta">
-        <h3 class="entry__title">${n.title}</h3>
-        <time class="entry__status" datetime="${n.date.replace('.', '-')}">${n.date}</time>
-      </div>
-      <p class="entry__desc">${n.excerpt}</p>
     </article>`
   ).join('')
 }
@@ -300,43 +265,11 @@ document.querySelector('#app').innerHTML = `
 
         <section class="panel" id="notes" aria-labelledby="notes-heading">
           <p class="panel__index">04 / 笔记</p>
-          <h2 class="panel__heading" id="notes-heading">笔记</h2>
+          <h2 class="panel__heading" id="notes-heading">笔记专栏</h2>
           <p class="panel__lead">
-            技术札记、学习路径，以及路上随手记下的想法。
+            两个专栏来自你的 OneNote：点击进入查看章节；留言板在下方。
           </p>
-          <div class="entry-list">
-            ${renderNotes()}
-          </div>
-        </section>
-
-        <section class="panel panel--alt" id="contact" aria-labelledby="contact-heading">
-          <p class="panel__index">05 / 联系</p>
-          <h2 class="panel__heading" id="contact-heading">联系</h2>
-          <p class="panel__lead">
-            用 GitHub 登录后即可留言。留言会保存在阿里云服务器上的数据文件中。
-          </p>
-
-          <div class="contact-block">
-            <a
-              class="contact-link"
-              href="${GITHUB_URL}"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                class="contact-link__avatar"
-                src="${AVATAR_URL}"
-                alt=""
-                width="56"
-                height="56"
-              />
-              <span class="contact-link__text">
-                <span class="contact-link__label">GitHub</span>
-                <span class="contact-link__name">myblodyvalentin</span>
-                <span class="contact-link__hint">打开主页 →</span>
-              </span>
-            </a>
-          </div>
+          <div id="notes-root" class="notes-root"></div>
 
           <div class="guestbook" id="guestbook">
             <div class="guestbook__header">
@@ -381,6 +314,39 @@ document.querySelector('#app').innerHTML = `
             </form>
 
             <div class="guestbook__list" data-guestbook-list aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="panel panel--alt" id="contact" aria-labelledby="contact-heading">
+          <p class="panel__index">05 / 联系</p>
+          <h2 class="panel__heading" id="contact-heading">联系</h2>
+          <p class="panel__lead">
+            也可以先去笔记区留言，或通过 GitHub 找到我。
+          </p>
+
+          <div class="contact-block">
+            <a
+              class="contact-link"
+              href="${GITHUB_URL}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                class="contact-link__avatar"
+                src="${AVATAR_URL}"
+                alt=""
+                width="56"
+                height="56"
+              />
+              <span class="contact-link__text">
+                <span class="contact-link__label">GitHub</span>
+                <span class="contact-link__name">myblodyvalentin</span>
+                <span class="contact-link__hint">打开主页 →</span>
+              </span>
+            </a>
+            <p class="contact-note">
+              <a href="#notes">前往笔记专栏与留言板 →</a>
+            </p>
           </div>
         </section>
 
@@ -474,4 +440,5 @@ initSketch({
   floatsHost: document.getElementById('sketch-floats'),
 })
 
+initNotes(document.getElementById('notes-root'))
 initGuestbook(document.getElementById('guestbook'))

@@ -85,7 +85,7 @@ app.get('/api/auth/github/callback', async (req, res) => {
     res.clearCookie('oauth_state', { path: '/' })
 
     if (!code || !state || !savedState || state !== savedState) {
-      res.redirect(`${FRONTEND_URL}/#contact?auth=error`)
+      res.redirect(`${FRONTEND_URL}/#notes?auth=error`)
       return
     }
 
@@ -104,7 +104,7 @@ app.get('/api/auth/github/callback', async (req, res) => {
     })
     const tokenData = await tokenRes.json()
     if (!tokenData.access_token) {
-      res.redirect(`${FRONTEND_URL}/#contact?auth=error`)
+      res.redirect(`${FRONTEND_URL}/#notes?auth=error`)
       return
     }
 
@@ -117,7 +117,7 @@ app.get('/api/auth/github/callback', async (req, res) => {
     })
     const ghUser = await userRes.json()
     if (!ghUser?.id || !ghUser?.login) {
-      res.redirect(`${FRONTEND_URL}/#contact?auth=error`)
+      res.redirect(`${FRONTEND_URL}/#notes?auth=error`)
       return
     }
 
@@ -128,9 +128,9 @@ app.get('/api/auth/github/callback', async (req, res) => {
       avatarUrl: ghUser.avatar_url || '',
     })
 
-    res.redirect(`${FRONTEND_URL}/#contact?auth=ok`)
+    res.redirect(`${FRONTEND_URL}/#notes?auth=ok`)
   } catch {
-    res.redirect(`${FRONTEND_URL}/#contact?auth=error`)
+    res.redirect(`${FRONTEND_URL}/#notes?auth=error`)
   }
 })
 

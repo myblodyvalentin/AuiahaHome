@@ -1,0 +1,305 @@
+/** Auto-built from OneNote exports */
+export const NOTE_COLUMNS = [
+  {
+    "id": "java-web",
+    "title": "Java Web",
+    "subtitle": "Servlet / Session / Filter / Spring Boot",
+    "summary": "整理自 OneNote《Java web》：Web 会话、过滤器、拦截器与 Spring Boot 相关笔记。",
+    "topics": [
+      {
+        "id": "spring-boot",
+        "title": "Spring Boot 与起步依赖",
+        "paragraphs": [
+          "AOP程序中即可。",
+          "AOP实现这些业务功能时，对原有的业务代码是没有任何侵入的，不需要修改任何的业务代码。",
+          "Spring事务管理，底层其实也是通过AOP来实现的，只要添加@Transactional注解之后，AOP程序自动会在原始方法运行前先来开启事务，在原始方法运行完毕之后提交或回滚事务",
+          "SpringBoot所提供的起步依赖，就可以大大的简化pom文件当中依赖的配置，从而解决了Spring框架当中依赖配置繁琐的问题。",
+          "bean的声明以及bean的配置。我们只需要引入程序开发时所需要的起步依赖，项目开发时所用到常见的配置都已经有了，我们直接使用就可以了。",
+          "Spring 项目，你可能需要自己考虑：",
+          "Spring Boot 第一个东西：起步依赖",
+          "Spring Boot 给你准备好的依赖套餐。",
+          "Spring Boot 提供的起步依赖，简化 pom.xml 中的依赖配置。",
+          "Maven的依赖传递。",
+          "SpringBoot项目当中，我们引入对应的依赖之后，是如何将依赖jar包当中所提供的bean以及配置类直接加载到当前项目的SpringIOC容器当中的。",
+          "IOC的时候有提到过，在类上添加@Component注解来声明bean对象时，还需要保证@Component注解能被Spring的组件扫描到。",
+          "SpringBootApplication注解，具有包扫描的作用，但是它只会扫描启动类所在的当前包以及子包。",
+          "Import 导入（使用@Import导入的类会被Spring加载到IOC容器中）",
+          "SpringBoot中并没有采用以上这种方案。",
+          "Spring：把某些东西加入 IoC 容器。"
+        ]
+      },
+      {
+        "id": "intro",
+        "title": "JavaWeb 概述",
+        "paragraphs": [
+          "vs 异步**：同步发起请求后需等待服务器响应才能继续；异步发起请求后可继续其他操作。",
+          "Session 来进行会话跟踪，浏览器在第一次请求服务器的时候，我们就可以直接在服务器当中来获取到会话对象Session。如果是第一次请求Session ，会话对象是不",
+          "Cookie 的数据获取出来，并且携带到服务端。接下来服务器拿到JSESSIONID这个 Cookie 的值，也就是 Session 的ID。拿到 ID 之后，就会从众",
+          "JSESSIONID 代表的服务器端会话对象 Session 的 ID。浏览器会自动识别这个响应头，然后自动将Cookie存储在浏览器本地。",
+          "web服务器上的资源，必须先经过滤器，过滤器处理完毕之后，才可以访问对应的资源。",
+          "web程序打包，需要部署在外部的tomcat服务器中运行",
+          "web服务器当中，定义了两个过滤器，这两个过滤器就形成了一个过滤器链。",
+          "session用不了集群服务器",
+          "cookie 来跟踪会话，我们就可以在浏览器第一次发起请求来请求服务器的时候，我们在服务器端来设",
+          "Session，它是服务器端会话跟踪技术，所以它是存储在服务器端的。而 Session 的底层其实就是基于我们刚才所介绍的 Cookie 来实现的。"
+        ]
+      },
+      {
+        "id": "servlet",
+        "title": "Servlet",
+        "paragraphs": [
+          "Spring事务管理，底层其实也是通过AOP来实现的，只要添加@Transactional注解之后，AOP程序自动会在原始方法运行前先来开启事务，在原始方法运行完毕之后提交或回滚事务",
+          "IOC的时候有提到过，在类上添加@Component注解来声明bean对象时，还需要保证@Component注解能被Spring的组件扫描到。",
+          "SpringBootApplication注解，具有包扫描的作用，但是它只会扫描启动类所在的当前包以及子包。",
+          "Order注解，来控制不同的切面类通知的执行顺序",
+          "SpringBootApplication 注解，在这个注解中封装了3个注解，分别是：",
+          "Import注解（Import注解中指定了一个ImportSelector接口的实现类）",
+          "SpringBoot程序启动时，就会加载配置文件当中所定义的配置类，并将这些配置类信息(类的全限定名)封装到String类型的数组中，最终通过@Import注解将这些配置类全部加载到Spring的IOC容器中，交给IOC容器管理。",
+          "bean对象时，上面有加一个以 @Conditional 开头的注解，这种注解的作用就是按照条件进行装配，只有满足条件之后，才会将bean注册到Spring的IOC容器中（下面会详细来讲解）",
+          "Value注解就可以了。",
+          "Retention也是原注解，代表这个注解什么时候生效。后面参数代表是在运行是生效。",
+          "Bean 的衍生注解（作用与",
+          "Import注解，Import注解里面指定了一个ImportSelector接口的实现类。",
+          "bean都会加载到Spring的IOC容器中吗? 其实并不会，因为这些配置类中在声明bean时，通常都会添加@Conditional开头的注解，这个注解就是进行条件装配。而Spring会根据Conditional注解有选择性的进行bean的创建。",
+          "import 注解，它里面指定了一个类，是 ImportSelector 接口的实现类。在实现类当中，我们需要去实现 ImportSelector 接口当中的一个方法 selectImports 这个方法。这个方法的返回值代表的就是我需要将哪些类交给 spring 的 IOC容器进行管理。",
+          "bean都会加载到 spring 的 IOC 容器当中吗？其实并不会，因为这些配置类当中，在声明 bean 的时候，通常会加上这么一类@Conditional 开头的注解。这个注解就是进行条件装配。所以SpringBoot非常的智能，它会根据 @Conditional 注解来进行条件装配。只有条件成立，它才会",
+          "Filter类上面加了@WebFilter注解之后，接下来我们还需要在启动类上面加上一个注解@ServletComponentScan，通过这个@ServletComponentScan注解来开启SpringBoot项目对于",
+          "ConfigurationProperties注解，并通过perfect属性来指定配置参数项的前缀",
+          "RestControllerAdvice，加上这个注解就代表我们定义了一个全局异常处理器。",
+          "ExceptionHandler。通过@ExceptionHandler注解当中的value属性来指定我们要捕获的是哪一类型的异常。",
+          "Spring 配置/导入逻辑包装成一个简单的“开启功能”注解。",
+          "Spring中的@Scope注解来进行配置作用域",
+          "singleton的bean，在容器启动时被创建，可以使用@Lazy注解来延迟初始化（延迟到第一次使用时）",
+          "Component 及其衍生注解来声明bean的，此时就需要使用@Bean注解来声明bean 了。",
+          "bean 对象，建议对这些bean进行集中分类配置，可以通过 @Configuration 注解声明一个配置类。"
+        ]
+      },
+      {
+        "id": "request-response",
+        "title": "Request 与 Response",
+        "paragraphs": [
+          "async函数内有效，awt关腱字取代then函数，等待获取到请求成功的结果值。",
+          "vs 异步**：同步发起请求后需等待服务器响应才能继续；异步发起请求后可继续其他操作。",
+          "get请求的大小是有限制的 不适合提交大数据量的表单",
+          "Session 来进行会话跟踪，浏览器在第一次请求服务器的时候，我们就可以直接在服务器当中来获取到会话对象Session。如果是第一次请求Session ，会话对象是不",
+          "Session 的 ID 通过 Cookie 响应给浏览器。其实在响应头当中增加了一个 Set-Cookie 响应头。这个 Set-Cookie 响应头对应的值是不是",
+          "JSESSIONID 代表的服务器端会话对象 Session 的 ID。浏览器会自动识别这个响应头，然后自动将Cookie存储在浏览器本地。",
+          "Session 当中来找到当前请求对应的会话对象Session。",
+          "A；A 生成 sessionId，放在响应 Cookie 返回给浏览器，Session 数据只存在 A 的内存里。 第二次请求，浏览器自动带上 Cookie 里的",
+          "jwt令牌之后，会将jwt令牌存储起来。在后续的每一次请求中都会将jwt令牌携带到服务端。",
+          "jwt就是一个简单的字符串。可以在请求参数或者是请求头当中直接传递。",
+          "JSON 格式的请求体数据。",
+          "JWT令牌携带到服务端，请求到达服务端之后，要想去访问对应的业务功能，此时我们必须先要校验令牌的有效性。",
+          "token，如果解析失败，响应 401",
+          "Controller 控制器方法（Java 后端接口方法），它拦截的是Java 方法执行，不是网络文件请求，这种针对方法层面的拦截就叫动态拦截方法调用机制。",
+          "json后再响应给前端",
+          "HTTP 请求（小项目可忽略）",
+          "cookie 来跟踪会话，我们就可以在浏览器第一次发起请求来请求服务器的时候，我们在服务器端来设",
+          "cookie 响应给浏览器。",
+          "HTTP协议中支持的技术（像Set-Cookie 响应头的解析以及 Cookie 请求头数据的携带，都是浏览器自动进行的，是无需我们手动操作的）"
+        ]
+      },
+      {
+        "id": "session-cookie",
+        "title": "Cookie 与 Session",
+        "paragraphs": [
+          "Session 来进行会话跟踪，浏览器在第一次请求服务器的时候，我们就可以直接在服务器当中来获取到会话对象Session。如果是第一次请求Session ，会话对象是不",
+          "Session 的 ID 通过 Cookie 响应给浏览器。其实在响应头当中增加了一个 Set-Cookie 响应头。这个 Set-Cookie 响应头对应的值是不是",
+          "Cookie 的数据获取出来，并且携带到服务端。接下来服务器拿到JSESSIONID这个 Cookie 的值，也就是 Session 的ID。拿到 ID 之后，就会从众",
+          "JSESSIONID 代表的服务器端会话对象 Session 的 ID。浏览器会自动识别这个响应头，然后自动将Cookie存储在浏览器本地。",
+          "Session 当中来找到当前请求对应的会话对象Session。",
+          "Session 。而每一个会话对象Session ，它都有一个ID（示意图中Session后面括号中的1，就表示ID），我们称之为 Session 的ID。",
+          "A；A 生成 sessionId，放在响应 Cookie 返回给浏览器，Session 数据只存在 A 的内存里。 第二次请求，浏览器自动带上 Cookie 里的",
+          "B。 B 本地内存没有这个 sessionId 对应的会话数据，就识别不到用户，会话丢失，需要重新登录。",
+          "cookie 来跟踪会话，我们就可以在浏览器第一次发起请求来请求服务器的时候，我们在服务器端来设",
+          "HTTP协议中支持的技术（像Set-Cookie 响应头的解析以及 Cookie 请求头数据的携带，都是浏览器自动进行的，是无需我们手动操作的）",
+          "Cookie，这个Cookie是不能使用的，因为Cookie无法跨域",
+          "Session，它是服务器端会话跟踪技术，所以它是存储在服务器端的。而 Session 的底层其实就是基于我们刚才所介绍的 Cookie 来实现的。",
+          "Session是存储在服务端的，安全",
+          "Cookie实现的会话跟踪，如果Cookie不可用，则该方案，也就失效了。"
+        ]
+      },
+      {
+        "id": "filter-listener",
+        "title": "Filter 与 Listener",
+        "paragraphs": [
+          "web服务器上的资源，必须先经过滤器，过滤器处理完毕之后，才可以访问对应的资源。",
+          "Filter类上面加了@WebFilter注解之后，接下来我们还需要在启动类上面加上一个注解@ServletComponentScan，通过这个@ServletComponentScan注解来开启SpringBoot项目对于",
+          "web资源，就要执行放行操作，放行就是调用 FilterChain对象当中的doFilter()方法，在调用doFilter()这个方法之前所编写的",
+          "web应用程序当中，可以配置多个过滤器，多个过滤器就形成了一个过滤器链。",
+          "web服务器当中，定义了两个过滤器，这两个过滤器就形成了一个过滤器链。",
+          "Filter，放行之后再来执行第二个Filter，如果执行到了最后一个过滤器放行之后，才会访问对应的web资源。",
+          "web资源之后，按照我们刚才所介绍的过滤器的执行流程，还会回到过滤器当中来执行过滤器放行后的逻辑，而在执行放行后的逻辑的时候，顺序是反着的。",
+          "Filter，优先级是按照过滤器类名（字符串）的自然排序。 比如：",
+          "Spring框架中提供的，用来动态拦截控制器方法的执行。",
+          "Controller 控制器方法（Java 后端接口方法），它拦截的是Java 方法执行，不是网络文件请求，这种针对方法层面的拦截就叫动态拦截方法调用机制。",
+          "Spring MVC 中，写好拦截器之后，必须把它注册到 Spring 的拦截器链里，它才会生效。注册的方式就是创建一个配置类，实现 WebMvcConfigurer 接口，重写 addInterceptors 方法。",
+          "addPathPatterns(\"要拦截路径\")方法，就可以指定要拦截哪些资源。",
+          "excludePathPatterns(\"不拦截路径\")方法，指定哪些资源不需要拦截。"
+        ]
+      },
+      {
+        "id": "mvc-ajax",
+        "title": "MVC / Ajax / JSON",
+        "paragraphs": [
+          "async、awa谜可以让异步变为同步操作。async是来声明一个异步方法，await是用来等待异步任务执行。",
+          "vs 异步**：同步发起请求后需等待服务器响应才能继续；异步发起请求后可继续其他操作。",
+          "JSON Web Token （官网：https://jwt.io/），定义了一种简洁的、自包含的格式，用于在通信双方以json数据格式安全的传输信息。由于数字签名的存在，这些信息是可靠的。",
+          "JSON格式数据，转变为字符串的呢？",
+          "JWT令牌时，会对JSON格式的数据进行一次编码：进行base64编码",
+          "JSON 格式的请求体数据。",
+          "Spring MVC 中，写好拦截器之后，必须把它注册到 Spring 的拦截器链里，它才会生效。注册的方式就是创建一个配置类，实现 WebMvcConfigurer 接口，重写 addInterceptors 方法。",
+          "JavaScript 与 XML，实现无刷新异步数据交换。"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "linux",
+    "title": "Linux",
+    "subtitle": "文件系统 / 权限 / Vim / 进程",
+    "summary": "整理自 OneNote《Linux》：Linux 入门、用户权限、Vim 与常用命令笔记。",
+    "topics": [
+      {
+        "id": "intro",
+        "title": "Linux 入门与文件系统",
+        "paragraphs": [
+          "Linux的操作系统的pc服务器",
+          "d 用户的主目录（默认为/home/用户名） 用户名",
+          "r权限 如果要删除文件需要有目录的w权限",
+          "Windows的快捷方式可以为目录和文件创建软涟接。",
+          "Linux只能用rpm安装软件包，需要手工解决软件包的依赖关系。",
+          "yum之前，须保证Linux系统可以访问互联网（因为yum仓库在互联网上）。",
+          "r-d一u压纟宿包文件名目录和文件名列表",
+          "esc键回到命令模式",
+          "i 表示要插入文字",
+          "ls是现实不出来的",
+          "ls > 1.txt的结果如上图",
+          "d开头的全部文件",
+          "w的值为2 x的值为1",
+          "r权限 文件是否能真的执行 还要有文件本身决定",
+          "us进程需要和系统打交道 如读写文件等等 就需要使用内核进程",
+          "sy （内核进程）操作系统的进程 ni改变用户优先级的进程",
+          "running在正在运行 stop表示停止 zombie表示僵尸进程",
+          "rpm的软件包管理器，能够从指定的服务器下载",
+          "vi打开会时间很长 这个就很是用",
+          "free空闲 used使用中",
+          "windows和linux之间进行传递文件",
+          "grep命令产生的进程"
+        ]
+      },
+      {
+        "id": "user",
+        "title": "用户与权限",
+        "paragraphs": [
+          "d 用户的主目录（默认为/home/用户名） 用户名",
+          "r权限 文件是否能真的执行 还要有文件本身决定",
+          "r权限 如果要删除文件需要有目录的w权限",
+          "sy （内核进程）操作系统的进程 ni改变用户优先级的进程",
+          "users表示登录的用户数量",
+          "esc键回到命令模式",
+          "Linux的操作系统的pc服务器",
+          "i 表示要插入文字",
+          "ls是现实不出来的",
+          "ls > 1.txt的结果如上图",
+          "d开头的全部文件",
+          "w的值为2 x的值为1",
+          "us进程需要和系统打交道 如读写文件等等 就需要使用内核进程",
+          "Windows的快捷方式可以为目录和文件创建软涟接。",
+          "running在正在运行 stop表示停止 zombie表示僵尸进程",
+          "Linux只能用rpm安装软件包，需要手工解决软件包的依赖关系。",
+          "rpm的软件包管理器，能够从指定的服务器下载",
+          "yum之前，须保证Linux系统可以访问互联网（因为yum仓库在互联网上）。",
+          "vi打开会时间很长 这个就很是用",
+          "free空闲 used使用中",
+          "windows和linux之间进行传递文件",
+          "grep命令产生的进程"
+        ]
+      },
+      {
+        "id": "vim",
+        "title": "Vim 编辑器",
+        "paragraphs": [
+          "esc键回到命令模式",
+          "i 表示要插入文字",
+          "space（空格键）继续显示；Ctrl+u上翻页；Ctrl+d下翻页；j下一行；k上一行；q退出。",
+          "Linux的操作系统的pc服务器",
+          "d 用户的主目录（默认为/home/用户名） 用户名",
+          "ls是现实不出来的",
+          "ls > 1.txt的结果如上图",
+          "d开头的全部文件",
+          "w的值为2 x的值为1",
+          "r权限 文件是否能真的执行 还要有文件本身决定",
+          "r权限 如果要删除文件需要有目录的w权限",
+          "us进程需要和系统打交道 如读写文件等等 就需要使用内核进程",
+          "sy （内核进程）操作系统的进程 ni改变用户优先级的进程",
+          "Windows的快捷方式可以为目录和文件创建软涟接。",
+          "running在正在运行 stop表示停止 zombie表示僵尸进程",
+          "Linux只能用rpm安装软件包，需要手工解决软件包的依赖关系。",
+          "rpm的软件包管理器，能够从指定的服务器下载",
+          "yum之前，须保证Linux系统可以访问互联网（因为yum仓库在互联网上）。",
+          "vi打开会时间很长 这个就很是用",
+          "free空闲 used使用中",
+          "windows和linux之间进行传递文件",
+          "grep命令产生的进程"
+        ]
+      },
+      {
+        "id": "file-cmd",
+        "title": "文件与目录命令",
+        "paragraphs": [
+          "ls > 1.txt的结果如上图",
+          "r权限 如果要删除文件需要有目录的w权限",
+          "Windows的快捷方式可以为目录和文件创建软涟接。",
+          "esc键回到命令模式",
+          "Linux的操作系统的pc服务器",
+          "d 用户的主目录（默认为/home/用户名） 用户名",
+          "i 表示要插入文字",
+          "ls是现实不出来的",
+          "d开头的全部文件",
+          "w的值为2 x的值为1",
+          "r权限 文件是否能真的执行 还要有文件本身决定",
+          "us进程需要和系统打交道 如读写文件等等 就需要使用内核进程",
+          "sy （内核进程）操作系统的进程 ni改变用户优先级的进程",
+          "running在正在运行 stop表示停止 zombie表示僵尸进程",
+          "Linux只能用rpm安装软件包，需要手工解决软件包的依赖关系。",
+          "rpm的软件包管理器，能够从指定的服务器下载",
+          "yum之前，须保证Linux系统可以访问互联网（因为yum仓库在互联网上）。",
+          "vi打开会时间很长 这个就很是用",
+          "free空闲 used使用中",
+          "windows和linux之间进行传递文件",
+          "grep命令产生的进程",
+          "r-d一u压纟宿包文件名目录和文件名列表"
+        ]
+      },
+      {
+        "id": "process-net",
+        "title": "进程 / 服务 / 网络",
+        "paragraphs": [
+          "us进程需要和系统打交道 如读写文件等等 就需要使用内核进程",
+          "sy （内核进程）操作系统的进程 ni改变用户优先级的进程",
+          "running在正在运行 stop表示停止 zombie表示僵尸进程",
+          "grep命令产生的进程",
+          "esc键回到命令模式",
+          "Linux的操作系统的pc服务器",
+          "d 用户的主目录（默认为/home/用户名） 用户名",
+          "i 表示要插入文字",
+          "ls是现实不出来的",
+          "ls > 1.txt的结果如上图",
+          "d开头的全部文件",
+          "w的值为2 x的值为1",
+          "r权限 文件是否能真的执行 还要有文件本身决定",
+          "r权限 如果要删除文件需要有目录的w权限",
+          "Windows的快捷方式可以为目录和文件创建软涟接。",
+          "Linux只能用rpm安装软件包，需要手工解决软件包的依赖关系。",
+          "rpm的软件包管理器，能够从指定的服务器下载",
+          "yum之前，须保证Linux系统可以访问互联网（因为yum仓库在互联网上）。",
+          "vi打开会时间很长 这个就很是用",
+          "free空闲 used使用中",
+          "windows和linux之间进行传递文件",
+          "r-d一u压纟宿包文件名目录和文件名列表"
+        ]
+      }
+    ]
+  }
+]
