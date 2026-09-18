@@ -1040,6 +1040,80 @@ body[data-theme="contrast"] .panel--alt {
   color: var(--accent-soft);
 }
 
+.notes-topic__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.notes-topic__summary {
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+.notes-article--rich {
+  max-width: 46rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.notes-article--rich h4 {
+  margin: 1.5rem 0 0.45rem;
+  font-family: var(--font-display);
+  font-size: 1.14rem;
+  font-weight: 700;
+  color: var(--home-color);
+  line-height: 1.35;
+}
+
+.notes-article--rich h4:first-child {
+  margin-top: 0.25rem;
+}
+
+.notes-article--rich p {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin: 0 0 0.7rem;
+  line-height: 1.75;
+}
+
+.notes-article--rich .note-code {
+  margin: 0.35rem 0 0.85rem;
+  padding: 0.75rem 0.9rem;
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 5%, var(--surface, transparent));
+  border: 1px solid var(--surface-line);
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.note-figure {
+  margin: 0.85rem 0 1.15rem;
+}
+
+.note-figure + .note-figure {
+  margin-top: 0.35rem;
+}
+
+.note-figure img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--surface-line);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
 .notes-article {
   display: grid;
   gap: 0.85rem;

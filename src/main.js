@@ -267,7 +267,7 @@ document.querySelector('#app').innerHTML = `
           <p class="panel__index">04 / 笔记</p>
           <h2 class="panel__heading" id="notes-heading">笔记专栏</h2>
           <p class="panel__lead">
-            两个专栏来自你的 OneNote：点击进入查看章节；留言板在下方。
+            Java Web 与 Linux 两个专栏：点进模块可读完整图文笔记，下方可留言。
           </p>
           <div id="notes-root" class="notes-root"></div>
 

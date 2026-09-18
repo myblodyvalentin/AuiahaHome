@@ -8,3 +8,10 @@ server/.env
 server/data/*.json
 server/data/*.tmp
 server/node_modules
+
+_onenote_export/
+_*.mjs
+_extract*
+_topics*
+_build*
+

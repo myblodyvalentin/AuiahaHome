@@ -16,6 +16,15 @@ function findTopic(column, topicId) {
   return column?.topics?.find((t) => t.id === topicId) || null
 }
 
+function topicMeta(topic) {
+  if (topic.html) {
+    const imgs = (topic.html.match(/<img\b/gi) || []).length
+    const paras = (topic.html.match(/<p\b/gi) || []).length
+    return imgs ? `${paras} 段 · ${imgs} 图` : `${paras} 段笔记`
+  }
+  return `${topic.paragraphs?.length || 0} 条笔记`
+}
+
 function renderHub() {
   return `
     <div class="notes-hub">
@@ -26,7 +35,7 @@ function renderHub() {
           <span class="notes-col-card__title">${escapeHtml(col.title)}</span>
           <span class="notes-col-card__subtitle">${escapeHtml(col.subtitle)}</span>
           <span class="notes-col-card__summary">${escapeHtml(col.summary)}</span>
-          <span class="notes-col-card__cta">进入专栏 →</span>
+          <span class="notes-col-card__cta">进入专栏 · ${col.topics.length} 个模块 →</span>
         </button>`
       ).join('')}
     </div>`
@@ -46,8 +55,11 @@ function renderColumn(column) {
           .map(
             (t) => `
           <button class="notes-topic" type="button" data-notes-open-topic="${column.id}/${t.id}">
-            <span class="notes-topic__title">${escapeHtml(t.title)}</span>
-            <span class="notes-topic__meta">${t.paragraphs.length} 条笔记</span>
+            <span class="notes-topic__copy">
+              <span class="notes-topic__title">${escapeHtml(t.title)}</span>
+              <span class="notes-topic__summary">${escapeHtml(t.summary || '')}</span>
+            </span>
+            <span class="notes-topic__meta">${escapeHtml(topicMeta(t))}</span>
           </button>`
           )
           .join('')}
@@ -56,22 +68,26 @@ function renderColumn(column) {
 }
 
 function renderTopic(column, topic) {
+  const body = topic.html
+    ? topic.html
+    : (topic.paragraphs || []).map((p) => `<p>${escapeHtml(p)}</p>`).join('')
+
   return `
     <div class="notes-view">
       <button class="notes-back" type="button" data-notes-back="col:${column.id}">← 返回 ${escapeHtml(column.title)}</button>
       <header class="notes-view__header">
         <p class="notes-view__eyebrow">${escapeHtml(column.title)}</p>
         <h3 class="notes-view__title">${escapeHtml(topic.title)}</h3>
+        ${topic.summary ? `<p class="notes-view__summary">${escapeHtml(topic.summary)}</p>` : ''}
       </header>
-      <div class="notes-article">
-        ${topic.paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join('')}
-      </div>
+      <article class="notes-article notes-article--rich">
+        ${body}
+      </article>
     </div>`
 }
 
 function parseHash() {
   const raw = window.location.hash.replace(/^#/, '')
-  // notes / notes/java-web / notes/java-web/servlet
   if (!raw.startsWith('notes')) return { level: 'hub' }
   const parts = raw.split('/').filter(Boolean)
   if (parts.length === 1) return { level: 'hub' }
@@ -84,7 +100,6 @@ function setHash(path) {
   if (window.location.hash !== next) {
     window.location.hash = next
   } else {
-    // force re-render when same
     window.dispatchEvent(new HashChangeEvent('hashchange'))
   }
 }
@@ -99,6 +114,7 @@ export function initNotes(root) {
       const topic = findTopic(column, state.topicId)
       if (column && topic) {
         root.innerHTML = renderTopic(column, topic)
+        root.querySelector('.notes-view')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
         return
       }
     }
@@ -132,10 +148,7 @@ export function initNotes(root) {
   })
 
   window.addEventListener('hashchange', () => {
-    if (window.location.hash.startsWith('#notes') || !window.location.hash) {
-      // only re-render notes pane when hash related; always safe
-      if (document.getElementById('notes-root')) render()
-    }
+    if (document.getElementById('notes-root')) render()
   })
 
   render()
