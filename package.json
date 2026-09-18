@@ -1,0 +1,17 @@
+{
+  "name": "auiahahome",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:server": "npm --prefix server run dev",
+    "dev:all": "npm run dev:server & npm run dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start:server": "npm --prefix server start"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  }
+}

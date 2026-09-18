@@ -1,0 +1,10 @@
+node_modules
+dist
+.DS_Store
+*.local
+.vite
+.env
+server/.env
+server/data/*.json
+server/data/*.tmp
+server/node_modules
