@@ -34,7 +34,7 @@ const MODULES = [
   {
     id: 'notes',
     title: '笔记',
-    desc: 'Java Web 与 Linux 两个专栏，点击进入阅读；下方可留言。',
+    desc: '前端 / Vue 工程化、Java Web 与 Linux 专栏；下方可留言。',
   },
   {
     id: 'contact',
@@ -267,7 +267,7 @@ document.querySelector('#app').innerHTML = `
           <p class="panel__index">04 / 笔记</p>
           <h2 class="panel__heading" id="notes-heading">笔记专栏</h2>
           <p class="panel__lead">
-            Java Web 与 Linux 两个专栏：点进模块可读完整图文笔记，下方可留言。
+            含前端基础、Vue 工程化、Java Web 与 Linux：点进模块可读完整图文笔记，下方可留言。
           </p>
           <div id="notes-root" class="notes-root"></div>
 
