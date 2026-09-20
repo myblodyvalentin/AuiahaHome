@@ -1,0 +1,61 @@
+.hero-cats {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-cat {
+  position: absolute;
+  transform: translate(-50%, -70%);
+  transform-origin: 50% 80%;
+  filter: drop-shadow(0 6px 0 rgba(40, 30, 10, 0.08));
+  will-change: left, top;
+}
+
+.hero-cat.is-left {
+  transform: translate(-50%, -70%) scaleX(-1);
+}
+
+.hero-cat__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.hero-cat__tail {
+  transform-origin: 24px 34px;
+  animation: cat-tail 1.4s ease-in-out infinite alternate;
+}
+
+.hero-cat.is-walking .hero-cat__leg--a,
+.hero-cat.is-walking .hero-cat__leg--c {
+  transform-origin: 50% 0;
+  animation: cat-step 0.42s ease-in-out infinite;
+}
+
+.hero-cat.is-walking .hero-cat__leg--b,
+.hero-cat.is-walking .hero-cat__leg--d {
+  transform-origin: 50% 0;
+  animation: cat-step 0.42s ease-in-out infinite reverse;
+}
+
+@keyframes cat-tail {
+  from {
+    transform: rotate(-12deg);
+  }
+  to {
+    transform: rotate(16deg);
+  }
+}
+
+@keyframes cat-step {
+  from {
+    transform: rotate(-22deg) translateY(0);
+  }
+  to {
+    transform: rotate(18deg) translateY(-2px);
+  }
+}

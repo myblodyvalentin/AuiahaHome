@@ -624,22 +624,18 @@ body.is-sketch-drawing .hero__content {
   inset: 0;
   z-index: 0;
   background:
-    var(--hero-veil),
-    url("https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1920&q=80")
-      center / cover no-repeat;
-  transform: scale(1.04);
-  animation: hero-drift 22s ease-in-out infinite alternate;
+    radial-gradient(circle at 86% 14%, rgba(255, 229, 102, 0.55) 0 4.5rem, transparent 5.5rem),
+    linear-gradient(180deg, #9ad6ff 0%, #d7f0ff 38%, #f7edd0 38.2%, #efe0b8 100%);
+  transform: none;
+  animation: none;
   transition: opacity 0.45s ease;
 }
 
 body[data-theme="blue"] .hero__atmosphere,
 body[data-theme="pink"] .hero__atmosphere,
-body[data-theme="yellow"] .hero__atmosphere {
-  opacity: 0.55;
-}
-
+body[data-theme="yellow"] .hero__atmosphere,
 body[data-theme="white"] .hero__atmosphere {
-  opacity: 0.35;
+  opacity: 1;
 }
 
 body[data-theme="contrast"] .hero__atmosphere {
@@ -662,6 +658,7 @@ body[data-theme="contrast"] .hero__atmosphere {
   z-index: 4;
   max-width: 42rem;
   animation: rise-in 1s var(--ease-out) both;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .hero__sketch-hint {
@@ -1232,6 +1229,10 @@ body[data-theme="contrast"] .panel--alt {
   max-width: 36rem;
 }
 
+.contact-facts {
+  margin-top: 1.5rem;
+}
+
 .contact-link {
   display: inline-flex;
   align-items: center;
@@ -1345,6 +1346,11 @@ body[data-theme="contrast"] .guestbook__status.is-error {
   margin-bottom: 1.35rem;
 }
 
+.guestbook__auth[hidden],
+.guestbook__form[hidden] {
+  display: none;
+}
+
 .guestbook__auth-text {
   color: var(--ink-muted);
   font-size: 0.95rem;
@@ -1453,6 +1459,13 @@ body[data-theme="white"] .guestbook__submit {
 
 .guestbook__submit {
   justify-self: start;
+}
+
+.guestbook__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
 }
 
 .guestbook__list {

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 function resolveDataFile() {
-  const configured = process.env.DATA_FILE || './data/messages.json'
+  const configured = process.env.REVIEWS_FILE || './data/reviews.json'
   return path.isAbsolute(configured)
     ? configured
     : path.resolve(__dirname, '..', configured)
@@ -17,7 +17,7 @@ function ensureStore(filePath) {
     fs.mkdirSync(dir, { recursive: true })
   }
   if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify({ messages: [] }, null, 2), 'utf8')
+    fs.writeFileSync(filePath, JSON.stringify({ items: [] }, null, 2), 'utf8')
   }
 }
 
@@ -26,10 +26,10 @@ function readStore(filePath) {
   const raw = fs.readFileSync(filePath, 'utf8')
   try {
     const data = JSON.parse(raw)
-    if (!Array.isArray(data.messages)) data.messages = []
+    if (!Array.isArray(data.items)) data.items = []
     return data
   } catch {
-    return { messages: [] }
+    return { items: [] }
   }
 }
 
@@ -40,7 +40,7 @@ function writeStore(filePath, data) {
   fs.renameSync(tmp, filePath)
 }
 
-export function createMessageStore() {
+export function createReviewStore() {
   const filePath = resolveDataFile()
   ensureStore(filePath)
 
@@ -48,25 +48,33 @@ export function createMessageStore() {
     filePath,
     list() {
       const data = readStore(filePath)
-      return [...data.messages].sort(
+      return [...data.items].sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       )
     },
-    add(message) {
+    get(id) {
       const data = readStore(filePath)
-      data.messages.push(message)
-      writeStore(filePath, data)
-      return message
+      return data.items.find((item) => item.id === id) || null
     },
-    remove(id, githubId, asAdmin = false) {
+    add(item) {
       const data = readStore(filePath)
-      const index = data.messages.findIndex(
-        (m) => m.id === id && (asAdmin || m.user?.id === githubId)
-      )
-      if (index === -1) return false
-      data.messages.splice(index, 1)
+      data.items.push(item)
       writeStore(filePath, data)
-      return true
+      return item
+    },
+    remove(id) {
+      const data = readStore(filePath)
+      const index = data.items.findIndex((item) => item.id === id)
+      if (index === -1) return null
+      const [removed] = data.items.splice(index, 1)
+      writeStore(filePath, data)
+      return removed
+    },
+    hasImage(filename) {
+      const data = readStore(filePath)
+      return data.items.some((item) =>
+        (item.payload?.images || []).some((img) => img.filename === filename)
+      )
     },
   }
 }

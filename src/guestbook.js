@@ -44,7 +44,9 @@ function formatTime(iso) {
 }
 
 function renderMessage(message, currentUser) {
-  const canDelete = currentUser && currentUser.id === message.user?.id
+  const canDelete =
+    currentUser &&
+    (currentUser.id === message.user?.id || currentUser.isAdmin)
   const name = escapeHtml(message.user?.name || message.user?.login || '访客')
   const login = escapeHtml(message.user?.login || '')
   const avatar = escapeHtml(message.user?.avatarUrl || '')
@@ -129,9 +131,11 @@ export function initGuestbook(root) {
         api('/messages'),
       ])
       currentUser = me.user
+      if (currentUser) currentUser.isAdmin = Boolean(me.isAdmin || me.user?.isAdmin)
       syncAuthUi()
       renderList(board.messages || [])
       setStatus('')
+      window.dispatchEvent(new CustomEvent('auiaha-auth-changed'))
     } catch (err) {
       setStatus(
         `留言板暂时连不上服务器。请确认已启动 server（${err.message}）`,
@@ -167,13 +171,18 @@ export function initGuestbook(root) {
       return
     }
     try {
-      await api('/messages', {
+      const result = await api('/messages', {
         method: 'POST',
         body: JSON.stringify({ body }),
       })
       if (textarea) textarea.value = ''
-      setStatus('留言已发布')
-      await refresh()
+      if (result.pending) {
+        setStatus(result.message || '已提交审核，通过后才会公开')
+        window.dispatchEvent(new CustomEvent('auiaha-auth-changed'))
+      } else {
+        setStatus('留言已发布')
+        await refresh()
+      }
     } catch (err) {
       setStatus(err.message, true)
     }
@@ -196,6 +205,8 @@ export function initGuestbook(root) {
   const params = new URLSearchParams(window.location.hash.split('?')[1] || '')
   if (params.get('auth') === 'ok') setStatus('GitHub 登录成功，可以留言了')
   if (params.get('auth') === 'error') setStatus('GitHub 登录失败，请检查 OAuth 配置', true)
+
+  window.addEventListener('auiaha-moderation-changed', refresh)
 
   refresh()
 }

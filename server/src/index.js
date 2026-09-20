@@ -6,6 +6,10 @@ import { nanoid } from 'nanoid'
 import { createMessageStore } from './store.js'
 import { createSessionHelpers } from './session.js'
 import { registerGarden } from './garden.js'
+import { createAdmin } from './admin.js'
+import { createScanner } from './sensitive.js'
+import { createReviewStore } from './review-store.js'
+import { registerModeration } from './moderation.js'
 
 dotenv.config()
 
@@ -19,7 +23,7 @@ const CORS_ORIGIN = (process.env.CORS_ORIGIN || FRONTEND_URL)
   .map((s) => s.trim())
   .filter(Boolean)
 
-const AUTH_NEXT_PAGES = new Set(['notes', 'social', 'contact'])
+const AUTH_NEXT_PAGES = new Set(['notes', 'social', 'contact', 'moderation'])
 
 function readAuthNext(req) {
   const next = String(req.cookies?.oauth_next || '')
@@ -42,6 +46,9 @@ function setAuthNextCookie(res, nextPage) {
 }
 
 const store = createMessageStore()
+const reviews = createReviewStore()
+const scanner = createScanner()
+const admin = createAdmin()
 const session = createSessionHelpers({
   secret: process.env.SESSION_SECRET || '',
   secure: process.env.NODE_ENV === 'production',
@@ -74,7 +81,15 @@ app.get('/api/health', (_req, res) => {
 
 app.get('/api/auth/me', (req, res) => {
   const user = session.readUser(req)
-  res.json({ user })
+  if (!user) {
+    res.json({ user: null, isAdmin: false })
+    return
+  }
+  const isAdmin = admin.isAdmin(user)
+  res.json({
+    user: { ...user, isAdmin },
+    isAdmin,
+  })
 })
 
 app.get('/api/auth/github', (req, res) => {
@@ -184,23 +199,40 @@ app.post('/api/messages', session.requireUser, (req, res) => {
     return
   }
 
+  const user = {
+    id: req.user.id,
+    login: req.user.login,
+    name: req.user.name,
+    avatarUrl: req.user.avatarUrl,
+  }
+  const hits = scanner.scan(body)
+  if (hits.length) {
+    reviews.add({
+      id: nanoid(12),
+      type: 'message',
+      hits,
+      createdAt: new Date().toISOString(),
+      payload: { body, user },
+    })
+    res.status(202).json({
+      pending: true,
+      message: '内容含有敏感信息，已提交管理员审核。通过后才会公开，不通过将被删除。',
+    })
+    return
+  }
+
   const message = store.add({
     id: nanoid(12),
     body,
     createdAt: new Date().toISOString(),
-    user: {
-      id: req.user.id,
-      login: req.user.login,
-      name: req.user.name,
-      avatarUrl: req.user.avatarUrl,
-    },
+    user,
   })
 
   res.status(201).json({ message })
 })
 
 app.delete('/api/messages/:id', session.requireUser, (req, res) => {
-  const ok = store.remove(req.params.id, req.user.id)
+  const ok = store.remove(req.params.id, req.user.id, admin.isAdmin(req.user))
   if (!ok) {
     res.status(404).json({ error: '未找到可删除的留言（只能删除自己的）' })
     return
@@ -208,7 +240,21 @@ app.delete('/api/messages/:id', session.requireUser, (req, res) => {
   res.json({ ok: true })
 })
 
-const garden = registerGarden(app, { session })
+const garden = registerGarden(app, {
+  session,
+  reviews,
+  scan: scanner.scan,
+  isAdmin: admin.isAdmin,
+})
+
+registerModeration(app, {
+  requireAdmin: (req, res, next) => {
+    session.requireUser(req, res, () => admin.requireAdmin(req, res, next))
+  },
+  reviews,
+  messages: store,
+  garden,
+})
 
 app.use((err, _req, res, _next) => {
   console.error(err)
@@ -219,8 +265,10 @@ app.listen(PORT, () => {
   console.log(`[auiaha-server] http://localhost:${PORT}`)
   console.log(`[auiaha-server] data -> ${store.filePath}`)
   console.log(`[auiaha-server] flowers -> ${garden.store.filePath}`)
+  console.log(`[auiaha-server] reviews -> ${reviews.filePath}`)
   console.log(`[auiaha-server] uploads -> ${garden.uploadDir}`)
   console.log(`[auiaha-server] frontend -> ${FRONTEND_URL}`)
+  console.log(`[auiaha-server] sensitive words -> ${scanner.wordCount()}`)
   if (!GITHUB_CLIENT_ID || !GITHUB_CLIENT_SECRET) {
     console.warn('[auiaha-server] 警告：尚未配置 GitHub OAuth，登录不可用')
   }

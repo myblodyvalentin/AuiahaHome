@@ -146,7 +146,7 @@ function layersTemplate() {
 
           <section class="plant-module">
             <h4 class="plant-module__title">评论</h4>
-            <label class="plant-module__help" for="garden-comment">最多 500 字，写给大家看的小信。</label>
+            <label class="plant-module__help" for="garden-comment">最多 500 字，写给大家看的小信。请遵守法律法规，敏感内容会先审核。</label>
             <textarea
               id="garden-comment"
               class="plant-comment"
@@ -194,6 +194,7 @@ function layersTemplate() {
                 <span>字号</span>
                 <select data-letter-size>${sizeOptions}</select>
               </label>
+              <button class="letter-delete" type="button" data-letter-delete hidden>删除</button>
               <button class="letter-close" type="button" data-letter-close aria-label="关闭">×</button>
             </div>
           </header>
@@ -236,8 +237,10 @@ export function initGarden(root) {
 
   let grid = { cols: 18, rows: 7 }
   let flowers = []
+  let reserved = []
   let currentUser = null
   let pendingCoord = null
+  let openFlowerId = null
   let pendingFiles = []
   let planting = false
   let toastTimer = null
@@ -258,8 +261,16 @@ export function initGarden(root) {
     }
   }
 
-  function occupiedAt(col, row) {
+  function flowerAt(col, row) {
     return flowers.find((flower) => flower.col === col && flower.row === row) || null
+  }
+
+  function isReserved(col, row) {
+    return reserved.some((slot) => slot.col === col && slot.row === row)
+  }
+
+  function occupiedAt(col, row) {
+    return flowerAt(col, row) || isReserved(col, row)
   }
 
   function cellFromEvent(event) {
@@ -403,14 +414,19 @@ export function initGarden(root) {
   }
 
   async function tryPlant(coord) {
-    if (occupiedAt(coord.col, coord.row)) {
-      setStatus('这块草地已经有花了，换一个位置吧', true)
+    if (flowerAt(coord.col, coord.row)) {
+      openLetter(flowerAt(coord.col, coord.row))
+      return
+    }
+    if (isReserved(coord.col, coord.row)) {
+      setStatus('这块草地正在审核中，换一个位置吧', true)
       return
     }
 
     try {
       const me = await api('/auth/me')
       currentUser = me.user
+      if (currentUser) currentUser.isAdmin = Boolean(me.isAdmin || me.user?.isAdmin)
       syncAuthChip()
     } catch (err) {
       setStatus(`花园暂时连不上服务器（${err.message}）`, true)
@@ -462,6 +478,7 @@ export function initGarden(root) {
   }
 
   function openLetter(flower) {
+    openFlowerId = flower.id
     const name = flower.user?.name || flower.user?.login || '访客'
     layers.querySelector('[data-letter-name]').textContent = name
     layers.querySelector('[data-letter-time]').textContent = formatTime(flower.createdAt)
@@ -493,6 +510,9 @@ export function initGarden(root) {
     if (LETTER_SIZES.includes(savedSize)) sizeSelect.value = String(savedSize)
     applyLetterStyle()
 
+    const deleteBtn = layers.querySelector('[data-letter-delete]')
+    if (deleteBtn) deleteBtn.hidden = !currentUser?.isAdmin
+
     layers.querySelector('[data-letter-scroll]').scrollTop = 0
     showOverlay('letter')
     layers.querySelector('[data-letter-close]')?.focus()
@@ -509,16 +529,20 @@ export function initGarden(root) {
     try {
       const [me, garden] = await Promise.all([api('/auth/me'), api('/garden')])
       currentUser = me.user
+      if (currentUser) currentUser.isAdmin = Boolean(me.isAdmin || me.user?.isAdmin)
       if (garden.grid?.cols && garden.grid?.rows) {
         grid = { cols: garden.grid.cols, rows: garden.grid.rows }
       }
       flowers = garden.flowers || []
+      reserved = garden.reserved || []
       syncAuthChip()
       renderFlowers()
       setStatus(currentUser ? '' : '点空草地后会先确认登录状态')
+      window.dispatchEvent(new CustomEvent('auiaha-auth-changed'))
     } catch (err) {
       currentUser = null
       flowers = []
+      reserved = []
       syncAuthChip()
       renderFlowers()
       setStatus(`花园暂时连不上服务器。请确认已启动 server（${err.message}）`, true)
@@ -572,9 +596,13 @@ export function initGarden(root) {
     if (event.target.closest('[data-flower-id]')) return
     const cell = cellFromEvent(event)
     if (!cell) return
-    const existing = occupiedAt(cell.col, cell.row)
+    const existing = flowerAt(cell.col, cell.row)
     if (existing) {
       openLetter(existing)
+      return
+    }
+    if (isReserved(cell.col, cell.row)) {
+      setStatus('这块草地正在审核中，换一个位置吧', true)
       return
     }
     tryPlant(cell)
@@ -659,10 +687,18 @@ export function initGarden(root) {
 
     try {
       const result = await api('/garden/flowers', { method: 'POST', body })
-      if (result.flower) flowers.push(result.flower)
-      renderFlowers()
-      closePlant(true)
-      setStatus('种好啦，小花会一直留在草地上')
+      if (result.pending) {
+        reserved.push({ col: pendingCoord.col, row: pendingCoord.row })
+        renderFlowers()
+        closePlant(true)
+        setStatus(result.message || '已提交审核，通过后才会开花')
+        window.dispatchEvent(new CustomEvent('auiaha-auth-changed'))
+      } else if (result.flower) {
+        flowers.push(result.flower)
+        renderFlowers()
+        closePlant(true)
+        setStatus('种好啦，小花会一直留在草地上')
+      }
     } catch (err) {
       if (err.data?.occupied) {
         setPlantError(err.message)
@@ -679,6 +715,21 @@ export function initGarden(root) {
 
   layers.querySelector('[data-letter-close]').addEventListener('click', () => {
     hideOverlay('letter')
+    openFlowerId = null
+  })
+
+  layers.querySelector('[data-letter-delete]').addEventListener('click', async () => {
+    if (!openFlowerId || !currentUser?.isAdmin) return
+    if (!window.confirm('确定删除这朵已公开的小花？图片也会一起删掉。')) return
+    try {
+      await api(`/garden/flowers/${openFlowerId}`, { method: 'DELETE', body: '{}' })
+      hideOverlay('letter')
+      openFlowerId = null
+      setStatus('已删除小花')
+      await refresh()
+    } catch (err) {
+      setStatus(err.message, true)
+    }
   })
 
   overlays.letter.addEventListener('click', (event) => {
@@ -728,4 +779,6 @@ export function initGarden(root) {
       }, 4200)
     }
   })
+
+  window.addEventListener('auiaha-moderation-changed', refresh)
 }

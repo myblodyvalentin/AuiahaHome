@@ -67,7 +67,7 @@ function unlinkQuiet(filePath) {
   fs.unlink(filePath, () => {})
 }
 
-function publicFlower(flower) {
+export function publicFlower(flower) {
   return {
     id: flower.id,
     col: flower.col,
@@ -91,7 +91,7 @@ function multerMessage(err) {
   return err.message || '图片上传失败'
 }
 
-export function registerGarden(app, { session }) {
+export function registerGarden(app, { session, reviews, scan, isAdmin }) {
   const store = createGardenStore()
   const uploadDir = resolveUploadDir()
   ensureDir(uploadDir)
@@ -126,6 +126,10 @@ export function registerGarden(app, { session }) {
     res.json({
       grid: GARDEN_GRID,
       flowers: store.list().map(publicFlower),
+      reserved: store.listReserved().map((slot) => ({
+        col: slot.col,
+        row: slot.row,
+      })),
     })
   })
 
@@ -142,7 +146,20 @@ export function registerGarden(app, { session }) {
       return
     }
 
-    res.setHeader('Cache-Control', 'public, max-age=604800, immutable')
+    const published = store.hasImage(filename)
+    if (!published) {
+      const pending = reviews?.hasImage(filename)
+      const user = session.readUser(req)
+      if (!pending || !isAdmin?.(user)) {
+        res.status(404).json({ error: '图片不存在' })
+        return
+      }
+    }
+
+    res.setHeader('Cache-Control', 'private, no-store')
+    if (published) {
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable')
+    }
     res.sendFile(filePath)
   })
 
@@ -202,20 +219,60 @@ export function registerGarden(app, { session }) {
           })
         }
 
+        const user = {
+          id: req.user.id,
+          login: req.user.login,
+          name: req.user.name,
+          avatarUrl: req.user.avatarUrl,
+        }
+        const hits = scan ? scan(comment) : []
+        const color = PALETTE[Math.floor(Math.random() * PALETTE.length)]
+        const createdAt = new Date().toISOString()
+
+        if (hits.length) {
+          const pendingId = nanoid(12)
+          try {
+            await store.reserve({ col, row, pendingId })
+          } catch (error) {
+            cleanup()
+            if (error?.code === 'OCCUPIED') {
+              res.status(409).json({ error: error.message, occupied: true })
+              return
+            }
+            throw error
+          }
+
+          reviews.add({
+            id: pendingId,
+            type: 'flower',
+            hits,
+            createdAt,
+            payload: {
+              col,
+              row,
+              comment,
+              images,
+              color,
+              user,
+            },
+          })
+
+          res.status(202).json({
+            pending: true,
+            message: '内容含有敏感信息，已提交管理员审核。通过后才会在草地开花，不通过将被删除。',
+          })
+          return
+        }
+
         const flower = await store.plant({
           id: nanoid(12),
           col,
           row,
           comment,
           images,
-          color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
-          createdAt: new Date().toISOString(),
-          user: {
-            id: req.user.id,
-            login: req.user.login,
-            name: req.user.name,
-            avatarUrl: req.user.avatarUrl,
-          },
+          color,
+          createdAt,
+          user,
         })
 
         res.status(201).json({ flower: publicFlower(flower) })
@@ -231,5 +288,24 @@ export function registerGarden(app, { session }) {
     })
   })
 
-  return { store, uploadDir }
+  app.delete('/api/garden/flowers/:id', session.requireUser, async (req, res) => {
+    if (!isAdmin?.(req.user)) {
+      res.status(403).json({ error: '只有管理员可以删除已公开的小花' })
+      return
+    }
+
+    const flower = await store.remove(req.params.id)
+    if (!flower) {
+      res.status(404).json({ error: '没有这朵小花' })
+      return
+    }
+
+    for (const img of flower.images || []) {
+      unlinkQuiet(path.join(uploadDir, img.filename))
+    }
+
+    res.json({ ok: true })
+  })
+
+  return { store, uploadDir, publicFlower }
 }

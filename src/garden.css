@@ -605,6 +605,16 @@ body.is-garden-modal {
   line-height: 1;
 }
 
+.letter-delete {
+  min-height: 32px;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  background: rgba(153, 27, 27, 0.08);
+  color: #9f1239;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .letter-close:hover,
 .lightbox-close:hover,
 .letter-close:focus-visible,

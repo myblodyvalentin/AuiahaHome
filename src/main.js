@@ -3,9 +3,13 @@ import { initSketch } from './sketch.js'
 import { initGuestbook } from './guestbook.js'
 import { initNotes } from './notes-ui.js'
 import { initGarden } from './garden.js'
+import { initHeroCats } from './cats.js'
+import { initModeration } from './moderation.js'
 
 const GITHUB_URL = 'https://github.com/myblodyvalentin'
 const AVATAR_URL = 'https://avatars.githubusercontent.com/u/233668318?v=4'
+const EMAIL = 'xuz92149@gmail.com'
+const QQ = '2430441427'
 const THEME_STORAGE_KEY = 'auiahahome-theme'
 
 const THEMES = [
@@ -40,7 +44,7 @@ const MODULES = [
   {
     id: 'notes',
     title: '笔记',
-    desc: '前端 / Vue 工程化、Java Web 与 Linux 专栏；下方可留言。',
+    desc: 'Java Web、Linux 与后端笔记；下方可留言。',
   },
   {
     id: 'contact',
@@ -53,20 +57,8 @@ const PROJECTS = [
   {
     name: 'AuiahaHome',
     status: '进行中',
-    desc: '个人数字居所：主题切换、侧栏导航，以及主视觉上的长按作画。',
+    desc: '个人数字居所：主题切换、侧栏导航、草地花园，以及主视觉上的长按作画。',
     href: 'https://github.com/myblodyvalentin/AuiahaHome',
-  },
-  {
-    name: '学习实验集',
-    status: '持续更新',
-    desc: '课堂与自学中的小实验——前端交互、页面结构与视觉节奏的练习场。',
-    href: GITHUB_URL,
-  },
-  {
-    name: '日常工具草稿',
-    status: '构思中',
-    desc: '把重复劳动收成小工具的想法簿，从脚本到轻量网页逐步落地。',
-    href: GITHUB_URL,
   },
 ]
 
@@ -143,6 +135,12 @@ document.querySelector('#app').innerHTML = `
       <p class="side-nav__label">全部模块</p>
       <ul class="side-nav__list">
         ${renderModulesList()}
+        <li data-admin-nav hidden>
+          <a class="side-nav__link" href="#moderation">
+            <span class="side-nav__title">审核</span>
+            <span class="side-nav__index" data-moderation-badge>07</span>
+          </a>
+        </li>
       </ul>
       <p class="side-nav__footer">悬停左侧菜单展开导航；点击右侧头像前往 GitHub。</p>
     </aside>
@@ -203,6 +201,7 @@ document.querySelector('#app').innerHTML = `
         <section class="hero" id="home" aria-labelledby="hero-brand">
           <div class="hero__atmosphere" aria-hidden="true"></div>
           <div class="hero__grain" aria-hidden="true"></div>
+          <div class="hero-cats" id="hero-cats" aria-hidden="true"></div>
           <div class="sketch-floats" id="sketch-floats" aria-hidden="true"></div>
           <div class="hero__content">
             <p class="hero__sketch-hint" aria-live="polite">长按鼠标可以作画</p>
@@ -229,10 +228,10 @@ document.querySelector('#app').innerHTML = `
           <div class="about-body">
             <p>
               AuiahaHome 是我的个人站点：把项目、笔记与日常灵感放在同一屋檐下。
-              我关注界面节奏、交互细节，以及如何让页面既好看也好用。
+              我目前的方向是后端开发，关注服务端、接口与系统如何稳定地跑起来。
             </p>
             <p>
-              课堂之外，我会持续练习前端与工程化基础，并把过程公开在 GitHub。
+              课堂之外，我会持续练习 Java、Linux 与后端基础，并把过程公开在 GitHub。
               这里会慢慢长出更多内容——不是一次做完，而是一直住下去。
             </p>
           </div>
@@ -247,7 +246,17 @@ document.querySelector('#app').innerHTML = `
             </div>
             <div class="about-facts__row">
               <dt>方向</dt>
-              <dd>前端 · 个人作品 · 交互实验</dd>
+              <dd>后端开发</dd>
+            </div>
+            <div class="about-facts__row">
+              <dt>邮箱</dt>
+              <dd>
+                <a href="mailto:${EMAIL}">${EMAIL}</a>
+              </dd>
+            </div>
+            <div class="about-facts__row">
+              <dt>QQ</dt>
+              <dd>${QQ}</dd>
             </div>
             <div class="about-facts__row">
               <dt>GitHub</dt>
@@ -269,6 +278,7 @@ document.querySelector('#app').innerHTML = `
               <h2 class="meadow__heading" id="social-heading">草地花园</h2>
               <p class="meadow__lead">
                 点空草地种一朵会微笑的小花，点小花可以读信。同一块草地只能种一朵。
+                请遵守中国法律法规；含敏感词的内容会进入审核，不通过将被删除。
               </p>
               <p class="meadow__status" data-garden-status role="status"></p>
               <div class="meadow__auth">
@@ -305,7 +315,7 @@ document.querySelector('#app').innerHTML = `
           <p class="panel__index">05 / 笔记</p>
           <h2 class="panel__heading" id="notes-heading">笔记专栏</h2>
           <p class="panel__lead">
-            含前端基础、Vue 工程化、Java Web 与 Linux：点进模块可读完整图文笔记，下方可留言。
+            含 Java Web 与 Linux：点进模块可读完整图文笔记，下方可留言。
           </p>
           <div id="notes-root" class="notes-root"></div>
 
@@ -348,6 +358,7 @@ document.querySelector('#app').innerHTML = `
                 placeholder="最多 500 字，友善交流～"
                 required
               ></textarea>
+              <p class="guestbook__hint">请遵守中国法律法规。含敏感词的内容会进入审核，审核不通过将被删除。</p>
               <button class="guestbook__submit" type="submit">发布留言</button>
             </form>
 
@@ -359,7 +370,7 @@ document.querySelector('#app').innerHTML = `
           <p class="panel__index">06 / 联系</p>
           <h2 class="panel__heading" id="contact-heading">联系</h2>
           <p class="panel__lead">
-            也可以先去笔记区留言，或通过 GitHub 找到我。
+            也可以先去笔记区留言，或通过邮箱、QQ、GitHub 找到我。
           </p>
 
           <div class="contact-block">
@@ -382,9 +393,34 @@ document.querySelector('#app').innerHTML = `
                 <span class="contact-link__hint">打开主页 →</span>
               </span>
             </a>
+            <dl class="about-facts contact-facts">
+              <div class="about-facts__row">
+                <dt>邮箱</dt>
+                <dd>
+                  <a href="mailto:${EMAIL}">${EMAIL}</a>
+                </dd>
+              </div>
+              <div class="about-facts__row">
+                <dt>QQ</dt>
+                <dd>${QQ}</dd>
+              </div>
+            </dl>
             <p class="contact-note">
               <a href="#notes">前往笔记专栏与留言板 →</a>
             </p>
+          </div>
+        </section>
+
+        <section class="panel" id="moderation" aria-labelledby="moderation-heading" hidden>
+          <p class="panel__index">07 / 审核</p>
+          <h2 class="panel__heading" id="moderation-heading">审核区</h2>
+          <p class="panel__lead">
+            留言板与草地花园里命中敏感词的内容会先到这里。通过后才会公开，不通过将直接删除。
+          </p>
+          <p class="moderation__status" data-moderation-status role="status"></p>
+          <p class="moderation__guest" data-moderation-guest>请使用站长 GitHub 账号登录后审核。</p>
+          <div class="moderation__board" data-moderation-board hidden>
+            <div class="moderation__list" data-moderation-list></div>
           </div>
         </section>
 
@@ -477,7 +513,13 @@ initSketch({
   hero: document.getElementById('home'),
   floatsHost: document.getElementById('sketch-floats'),
 })
+initHeroCats(document.getElementById('hero-cats'))
 
 initNotes(document.getElementById('notes-root'))
 initGuestbook(document.getElementById('guestbook'))
 initGarden(document.getElementById('social'))
+initModeration({
+  section: document.getElementById('moderation'),
+  navItem: document.querySelector('[data-admin-nav]'),
+  badge: document.querySelector('[data-moderation-badge]'),
+})
