@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import { nanoid } from 'nanoid'
 import { createMessageStore } from './store.js'
 import { createSessionHelpers } from './session.js'
+import { registerGarden } from './garden.js'
 
 dotenv.config()
 
@@ -17,6 +18,28 @@ const CORS_ORIGIN = (process.env.CORS_ORIGIN || FRONTEND_URL)
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean)
+
+const AUTH_NEXT_PAGES = new Set(['notes', 'social', 'contact'])
+
+function readAuthNext(req) {
+  const next = String(req.cookies?.oauth_next || '')
+  return AUTH_NEXT_PAGES.has(next) ? next : 'notes'
+}
+
+function authRedirect(res, status, nextPage = 'notes') {
+  const page = AUTH_NEXT_PAGES.has(nextPage) ? nextPage : 'notes'
+  res.redirect(`${FRONTEND_URL}/#${page}?auth=${status}`)
+}
+
+function setAuthNextCookie(res, nextPage) {
+  res.cookie('oauth_next', nextPage, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 1000 * 60 * 10,
+    path: '/',
+  })
+}
 
 const store = createMessageStore()
 const session = createSessionHelpers({
@@ -60,6 +83,11 @@ app.get('/api/auth/github', (req, res) => {
     return
   }
 
+  const nextPage = AUTH_NEXT_PAGES.has(String(req.query.next || ''))
+    ? String(req.query.next)
+    : 'notes'
+  setAuthNextCookie(res, nextPage)
+
   const state = nanoid(16)
   res.cookie('oauth_state', state, {
     httpOnly: true,
@@ -82,10 +110,12 @@ app.get('/api/auth/github/callback', async (req, res) => {
   try {
     const { code, state } = req.query
     const savedState = req.cookies?.oauth_state
+    const nextPage = readAuthNext(req)
     res.clearCookie('oauth_state', { path: '/' })
+    res.clearCookie('oauth_next', { path: '/' })
 
     if (!code || !state || !savedState || state !== savedState) {
-      res.redirect(`${FRONTEND_URL}/#notes?auth=error`)
+      authRedirect(res, 'error', nextPage)
       return
     }
 
@@ -104,7 +134,7 @@ app.get('/api/auth/github/callback', async (req, res) => {
     })
     const tokenData = await tokenRes.json()
     if (!tokenData.access_token) {
-      res.redirect(`${FRONTEND_URL}/#notes?auth=error`)
+      authRedirect(res, 'error', nextPage)
       return
     }
 
@@ -117,7 +147,7 @@ app.get('/api/auth/github/callback', async (req, res) => {
     })
     const ghUser = await userRes.json()
     if (!ghUser?.id || !ghUser?.login) {
-      res.redirect(`${FRONTEND_URL}/#notes?auth=error`)
+      authRedirect(res, 'error', nextPage)
       return
     }
 
@@ -128,9 +158,9 @@ app.get('/api/auth/github/callback', async (req, res) => {
       avatarUrl: ghUser.avatar_url || '',
     })
 
-    res.redirect(`${FRONTEND_URL}/#notes?auth=ok`)
+    authRedirect(res, 'ok', nextPage)
   } catch {
-    res.redirect(`${FRONTEND_URL}/#notes?auth=error`)
+    authRedirect(res, 'error', 'notes')
   }
 })
 
@@ -178,6 +208,8 @@ app.delete('/api/messages/:id', session.requireUser, (req, res) => {
   res.json({ ok: true })
 })
 
+const garden = registerGarden(app, { session })
+
 app.use((err, _req, res, _next) => {
   console.error(err)
   res.status(500).json({ error: err.message || '服务器错误' })
@@ -186,6 +218,8 @@ app.use((err, _req, res, _next) => {
 app.listen(PORT, () => {
   console.log(`[auiaha-server] http://localhost:${PORT}`)
   console.log(`[auiaha-server] data -> ${store.filePath}`)
+  console.log(`[auiaha-server] flowers -> ${garden.store.filePath}`)
+  console.log(`[auiaha-server] uploads -> ${garden.uploadDir}`)
   console.log(`[auiaha-server] frontend -> ${FRONTEND_URL}`)
   if (!GITHUB_CLIENT_ID || !GITHUB_CLIENT_SECRET) {
     console.warn('[auiaha-server] 警告：尚未配置 GitHub OAuth，登录不可用')

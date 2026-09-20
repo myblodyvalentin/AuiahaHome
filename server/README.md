@@ -166,6 +166,7 @@ pm2 startup
 server {
   listen 80;
   server_name 你的公网IP;   # 有域名就写域名
+  client_max_body_size 16m;
 
   root /var/www/auiahahome/dist;
   index index.html;
@@ -208,12 +209,15 @@ sudo systemctl reload nginx
 
 ```bash
 cat /var/www/auiahahome/server/data/messages.json
+cat /var/www/auiahahome/server/data/flowers.json
+ls /var/www/auiahahome/server/data/uploads/garden
 ```
 
-这就是留言板内容。备份只要复制这个文件：
+这就是留言板与草地花园的内容。备份只要复制这些文件：
 
 ```bash
 cp /var/www/auiahahome/server/data/messages.json ~/messages-backup.json
+cp /var/www/auiahahome/server/data/flowers.json ~/flowers-backup.json
 ```
 
 ---
@@ -240,3 +244,6 @@ cp /var/www/auiahahome/server/data/messages.json ~/messages-backup.json
 | GET | `/api/messages` | 留言列表 |
 | POST | `/api/messages` | 发布留言（需登录） |
 | DELETE | `/api/messages/:id` | 删除自己的留言 |
+| GET | `/api/garden` | 草地花朵列表 |
+| POST | `/api/garden/flowers` | 种花（需登录，最多 3 张图 / 每张 5MB） |
+| GET | `/api/garden/images/:filename` | 花朵图片 |

@@ -7,6 +7,7 @@ dist
 server/.env
 server/data/*.json
 server/data/*.tmp
+server/data/uploads/
 server/node_modules
 
 _onenote_export/

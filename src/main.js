@@ -2,6 +2,7 @@ import './style.css'
 import { initSketch } from './sketch.js'
 import { initGuestbook } from './guestbook.js'
 import { initNotes } from './notes-ui.js'
+import { initGarden } from './garden.js'
 
 const GITHUB_URL = 'https://github.com/myblodyvalentin'
 const AVATAR_URL = 'https://avatars.githubusercontent.com/u/233668318?v=4'
@@ -25,6 +26,11 @@ const MODULES = [
     id: 'about',
     title: '关于',
     desc: '了解 Xu Zhiquan — 东北大学，代码与生活交汇处。',
+  },
+  {
+    id: 'social',
+    title: '社交',
+    desc: '蓝天白云下的草地花园：点空地种花，点小花读信。',
   },
   {
     id: 'projects',
@@ -252,8 +258,40 @@ document.querySelector('#app').innerHTML = `
           </dl>
         </section>
 
+        <section class="meadow" id="social" aria-labelledby="social-heading">
+          <div class="meadow__sky">
+            <span class="meadow__sun" aria-hidden="true"></span>
+            <span class="meadow__cloud meadow__cloud--a" aria-hidden="true"></span>
+            <span class="meadow__cloud meadow__cloud--b" aria-hidden="true"></span>
+            <span class="meadow__cloud meadow__cloud--c" aria-hidden="true"></span>
+            <div class="meadow__intro">
+              <p class="meadow__index">03 / 社交</p>
+              <h2 class="meadow__heading" id="social-heading">草地花园</h2>
+              <p class="meadow__lead">
+                点空草地种一朵会微笑的小花，点小花可以读信。同一块草地只能种一朵。
+              </p>
+              <p class="meadow__status" data-garden-status role="status"></p>
+              <div class="meadow__auth">
+                <span class="meadow__auth-label" data-garden-auth-label></span>
+                <button class="meadow__login" type="button" data-garden-login>GitHub 登录</button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="meadow__field"
+            data-garden-field
+            role="application"
+            tabindex="0"
+            aria-label="可种花的草地"
+          >
+            <span class="meadow__field-hint" data-garden-hint>点这里种花</span>
+            <div class="garden-ghost" data-garden-ghost hidden></div>
+            <div class="garden-flowers" data-garden-flowers></div>
+          </div>
+        </section>
+
         <section class="panel panel--alt" id="projects" aria-labelledby="projects-heading">
-          <p class="panel__index">03 / 项目</p>
+          <p class="panel__index">04 / 项目</p>
           <h2 class="panel__heading" id="projects-heading">项目</h2>
           <p class="panel__lead">
             从想法到落地的作品与实验。点击名称可前往对应仓库。
@@ -264,7 +302,7 @@ document.querySelector('#app').innerHTML = `
         </section>
 
         <section class="panel" id="notes" aria-labelledby="notes-heading">
-          <p class="panel__index">04 / 笔记</p>
+          <p class="panel__index">05 / 笔记</p>
           <h2 class="panel__heading" id="notes-heading">笔记专栏</h2>
           <p class="panel__lead">
             含前端基础、Vue 工程化、Java Web 与 Linux：点进模块可读完整图文笔记，下方可留言。
@@ -318,7 +356,7 @@ document.querySelector('#app').innerHTML = `
         </section>
 
         <section class="panel panel--alt" id="contact" aria-labelledby="contact-heading">
-          <p class="panel__index">05 / 联系</p>
+          <p class="panel__index">06 / 联系</p>
           <h2 class="panel__heading" id="contact-heading">联系</h2>
           <p class="panel__lead">
             也可以先去笔记区留言，或通过 GitHub 找到我。
@@ -442,3 +480,4 @@ initSketch({
 
 initNotes(document.getElementById('notes-root'))
 initGuestbook(document.getElementById('guestbook'))
+initGarden(document.getElementById('social'))
